@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>DALI LIGHTING CONTROL Simulator — NC-R1.7 (2025-09-15)</title>
+<style>
+  :root{--bg:#0f172a;--card1:#071129;--card2:#0b1530;--ink:#e6eef8;--muted:#9fb0d4;--panel:#071733;--panel2:#04203a;--bar:#2dd4bf;--bar2:#06b6d4;}
+  body{margin:20px;background:var(--bg);color:var(--ink);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial}
+  .card{background:linear-gradient(180deg,var(--card1) 0%,var(--card2) 100%);border-radius:12px;padding:18px;margin-bottom:14px;box-shadow:0 6px 18px rgba(2,6,23,.6)}
+  h1{margin:0 0 8px;font-size:22px}
+  p.sub{margin:0 0 12px;color:var(--muted);font-size:13px}
+  .row{display:flex;gap:12px;flex-wrap:wrap}
+  .col{flex:1 1 320px;min-width:280px}
+  label{display:block;font-size:13px;margin-bottom:6px}
+  .slider-row{display:grid;grid-template-columns:1fr 120px 80px;gap:8px;align-items:center;margin-bottom:10px}
+  input[type=range]{width:100%}
+  input[type=number]{width:80px;padding:6px 8px;border-radius:8px;border:1px solid rgba(255,255,255,0.12);background:#10213a;color:#fff}
+  .value{font-weight:700;float:right}
+  .totals{display:flex;gap:12px;flex-wrap:wrap}
+  .totbox{flex:1 1 180px;background:linear-gradient(180deg,var(--panel) 0%,var(--panel2) 100%);padding:10px;border-radius:10px}
+  .big{font-size:18px}
+  .small{color:var(--muted);font-size:13px}
+  .controls{display:flex;gap:8px;align-items:center;margin-top:8px;flex-wrap:wrap}
+  button{background:#064e66;color:white;border:0;padding:8px 10px;border-radius:8px;cursor:pointer}
+  button.secondary{background:transparent;border:1px solid rgba(255,255,255,0.12)}
+  .combo{color:#ff4d4d;font-weight:700;margin-top:8px}
+  .circuit-list{margin-top:10px}
+  .circuit{padding:10px;border-radius:10px;background:linear-gradient(90deg,#062235,#07213a);margin-bottom:10px}
+  .bar{height:10px;border-radius:6px;background:rgba(255,255,255,0.06);overflow:hidden;margin-top:8px}
+  .bar-fill{height:100%;border-radius:6px;background:linear-gradient(90deg,var(--bar),var(--bar2));transition:width .25s}
+  .bar-label{font-size:12px;margin-top:6px;display:flex;justify-content:space-between}
+  footer{margin-top:16px;color:#91a9c9;font-size:13px}
+  code{background:#041726;padding:2px 6px;border-radius:4px}
+  @media (max-width:720px){.row{flex-direction:column}.col{min-width:auto}}
+</style>
+
+    <style>
+      .disclaimer {
+        color: red;
+        font-weight: bold;
+        font-size: inherit; /* same as build date */
+        display: block !important;
+        visibility: visible !important;
+        margin-top: 8px;
+      }
+      @media print {
+        .disclaimer {
+          color: red !important;
+          -webkit-print-color-adjust: exact;
+          print-color-adjust: exact;
+        }
+      }
+    </style>
+    
+
+    <style>
+      .author-line{ color:#fff !important; }
+    </style>
+    
+</head>
+<body>
+  <div class="card">
+    <h1>DALI LIGHTING CONTROL Simulator — Revision NC-R1.7</h1>
+        <div style="margin-top:2px;">
+          <span data-tag="baseline" style="display:inline-block;padding:2px 8px;border-radius:12px;background:#114a77;color:#e7f6ff;font-size:12px;letter-spacing:.3px;">
+            BASELINE
+          </span>
+        </div>
+        <div class="disclaimer">This Kit List is Subject to a FULL &amp; DETAILED DESIGN where hardware, licenses and commissioning requirements could increase or decrease depending on the building characteristics, project phasing and wiring requirements imposed by the Stage 3 design and/or regulations.</div>
+        <hr style="margin:6px 0;">
+        
+    <p class="sub">M-09-2025</strong></p>
+    <p class="sub" id="author-line" style="color:#ffffff;">Author: Austyn Cornwell</p>
+    <p class="sub">Max <strong>64 DALI addresses</strong> &amp; <strong>200 mA</strong> per circuit. Spare capacity reduces per‑circuit caps (for headroom) but <em>does not</em> change your raw totals. A second row appears to show totals including spare.</p>
+
+    <div class="row">
+      <div class="col card">
+        <h2 style="margin:0 0 10px;font-size:16px">Devices (sliders or type numbers)</h2>
+
+        <div class="slider-row">
+          <label>Standard luminaires <span class="value" id="val-lum">10</span></label>
+          <input id="lum" type="range" min="0" max="3000" value="10" />
+          <input id="num-lum" type="number" min="0" max="3000" value="10" />
+        </div>
+
+        <div class="slider-row">
+          <label>Integral emergency luminaires (monitored) <span class="value" id="val-em">2</span></label>
+          <input id="em" type="range" min="0" max="2000" value="2" />
+          <input id="num-em" type="number" min="0" max="2000" value="2" />
+        </div>
+
+        <div class="slider-row">
+          <label>Dedicated emergency luminaires <span class="value" id="val-dem">0</span></label>
+          <input id="dem" type="range" min="0" max="3000" value="0" />
+          <input id="num-dem" type="number" min="0" max="3000" value="0" />
+        </div>
+
+        <div class="slider-row">
+          <label>Sensors <span class="value" id="val-sens">1</span></label>
+          <input id="sens" type="range" min="0" max="2000" value="1" />
+          <input id="num-sens" type="number" min="0" max="2000" value="1" />
+        </div>
+
+        <div class="slider-row">
+          <label>Switch inputs <span class="value" id="val-sw">0</span></label>
+          <input id="sw" type="range" min="0" max="500" value="0" />
+          <input id="num-sw" type="number" min="0" max="500" value="0" />
+        </div>
+
+        <div class="slider-row">
+          <label>Scene plates <span class="value" id="val-sp">0</span></label>
+          <input id="sp" type="range" min="0" max="500" value="0" />
+          <input id="num-sp" type="number" min="0" max="500" value="0" />
+        </div>
+
+        <div class="slider-row">
+          <label>1ch Switching Relay <span class="value" id="val-r1">0</span></label>
+          <input id="r1" type="range" min="0" max="50" value="0" />
+          <input id="num-r1" type="number" min="0" max="50" value="0" />
+        </div>
+
+        <div class="slider-row">
+          <label>4ch Switching Relay <span class="value" id="val-r4">0</span></label>
+          <input id="r4" type="range" min="0" max="50" value="0" />
+          <input id="num-r4" type="number" min="0" max="50" value="0" />
+        </div>
+
+        <div class="slider-row">
+          <label>HiBay Sensor <span class="value" id="val-hb">0</span></label>
+          <input id="hb" type="range" min="0" max="1000" value="0" />
+          <input id="num-hb" type="number" min="0" max="1000" value="0" />
+        </div>
+
+        <div class="slider-row">
+          <label>DMX Controller <span class="value" id="val-dmx">0</span></label>
+          <input id="dmx" type="range" min="0" max="50" value="0" />
+          <input id="num-dmx" type="number" min="0" max="50" value="0" />
+        </div>
+        <div class="slider-row">
+          <label>VFC <span class="value" id="val-vfc">0</span></label>
+          <input id="vfc" type="range" min="0" max="1000" value="0" />
+          <input id="num-vfc" type="number" min="0" max="1000" value="0" />
+        </div>
+
+        <div class="controls">
+          <button id="btn-random">Example random</button>
+          <button class="secondary" id="btn-reset">Reset</button>
+        </div>
+
+        <div class="controls">
+          <span class="small">Spare capacity:</span>
+          <button id="spare0">0%</button> <button id="spare5" class="active">5%</button>
+          <button id="spare10">10%</button>
+          <button id="spare20">20%</button> <button id="spare30">30%</button>
+        </div>
+
+        <div class="controls">
+          <button id="btn-export">Export to Excel</button>
+        </div>
+        
+      </div>
+
+      <div class="col card">
+        <h2 style="margin:0 0 10px;font-size:16px">Device footprints</h2>
+        <div class="small">1 × standard luminaire = <code>1 DALI address</code> &amp; <code>2 mA</code></div>
+        <div class="small">1 × integral emergency luminaire (monitored) = <code>2 DALI addresses</code> &amp; <code>4 mA</code></div>
+        <div class="small">1 × dedicated emergency luminaire = <code>1 DALI address</code> &amp; <code>2 mA</code></div>
+        <div class="small">1 × sensor = <code>10 mA</code></div>
+        <div class="small">1 × switch input = <code>6 mA</code></div>
+        <div class="small">1 × scene plate = <code>8 mA</code></div>
+        <div class="small">1 × 1ch Switching Relay = <code>1 DALI address</code> &amp; <code>2 mA</code></div>
+        <div class="small">1 × 4ch Switching Relay = <code>4 DALI addresses</code> &amp; <code>8 mA</code></div>
+        <div class="small">1 × HiBay Sensor = <code>16 mA</code></div>
+        <div class="small">1 × DMX Controller = <code>16 DALI addresses</code> &amp; <code>32 mA</code></div>
+        <div class="small">1 × VFC = <code>0 DALI addresses</code> &amp; <code>6 mA</code></div>
+
+        <hr style="margin:12px 0;border:none;border-top:1px solid rgba(255,255,255,0.08)">
+
+        <div class="totals">
+          <div class="totbox"><div class="small">Total DALI addresses</div><div class="big" id="total-addr">0</div></div>
+          <div class="totbox"><div class="small">Total current (mA)</div><div class="big" id="total-ma">0</div></div>
+          <div class="totbox"><div class="small">Circuits required</div><div class="big" id="circuits">0</div><div class="small">(64 addr / 200 mA)</div></div>
+        </div>
+
+        <div id="spare-totals" class="totals" style="display:none; margin-top:8px;">
+          <div class="totbox"><div class="small">Max System DALI Addresses (incl. headroom)</div><div class="big" id="total-addr-spare">0</div></div>
+          <div class="totbox"><div class="small">Max System Milliamps (incl. headroom)</div><div class="big" id="total-ma-spare">0</div></div>
+          <div class="totbox"><div class="small">Effective per-circuit caps</div><div class="big" id="eff-caps">64 addr / 200 mA</div></div>
+        </div>
+        <div id="spare-capacity" class="totals" style="display:none; margin-top:8px;">
+          <div class="totbox"><div class="small">Spare capacity (addresses)</div><div class="big" id="spare-addr-diff">0</div></div>
+          <div class="totbox"><div class="small">Spare capacity (mA)</div><div class="big" id="spare-ma-diff">0</div></div>
+        </div>
+
+        <hr style="margin:12px 0;border:none;border-top:1px solid rgba(255,255,255,0.08)">
+
+        
+        <hr style="margin:12px 0;border:none;border-top:1px solid rgba(255,255,255,0.08)">
+
+    
+        <div class="small">Lighting Controllers Required</div>
+        <div class="totals" style="margin-top:8px">
+          <div class="totbox"><div class="small">1CH (all 1CH)</div><div class="big" id="ctrl-1ch">0</div></div>
+          <div class="totbox"><div class="small">3CH (all 3CH)</div><div class="big" id="ctrl-3ch">0</div></div>
+        </div>
+        <div id="ctrl-combo" class="combo"></div>
+        <div id="assignment" class="small" style="margin-top:8px"></div>
+
+        <hr style="margin:12px 0;border:none;border-top:1px solid rgba(255,255,255,0.08)">
+
+        <h2 style="margin:0 0 6px;font-size:16px">Per‑circuit allocation</h2>
+        <div id="circuits-area" class="circuit-list"></div>
+        
+      </div>
+    </div>
+
+    <footer>Standalone HTML — copy/save and open in any browser. Circuits limited to <strong>64 addresses</strong> and <strong>200 mA</strong> per DALI line. <br><strong>Revision NC-R1.7 (15-09-2025) - © 2025 Austyn Cornwell. All rights reserved.
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script>
+  (function(){
+    const FP = {
+      lum:  { addr:1,  ma:2,  name:'Standard luminaire' },
+      em:   { addr:2,  ma:4,  name:'Integral emergency luminaire' },
+      dem:  { addr:1,  ma:2,  name:'Dedicated emergency luminaire' },
+      sens: { addr:0,  ma:10, name:'Sensor' },
+      sw:   { addr:0,  ma:6,  name:'Switch input' },
+      sp:   { addr:0,  ma:8,  name:'Scene plate' },
+      r1:   { addr:1,  ma:2,  name:'1ch Switching Relay' },
+      r4:   { addr:4,  ma:8,  name:'4ch Switching Relay' },
+      hb:   { addr:0,  ma:16, name:'HiBay Sensor' },
+      dmx:  { addr:16, ma:32, name:'DMX Controller' },
+      vfc:  { addr:0,  ma:6,  name:'VFC' }
+    };
+    const MAX_ADDR = 64, MAX_MA = 200;
+    let spare = 0.05; // 0, 0.05, 0.10, 0.20, 0.30
+
+    // Elements helper
+    const $ = id => document.getElementById(id);
+    const els = {
+      lum:$('lum'), em:$('em'), dem:$('dem'), sens:$('sens'), sw:$('sw'), sp:$('sp'),
+      r1:$('r1'), r4:$('r4'), hb:$('hb'), dmx:$('dmx'), vfc:$('vfc'),
+      numLum:$('num-lum'), numEm:$('num-em'), numDem:$('num-dem'), numSens:$('num-sens'), numSw:$('num-sw'), numSp:$('num-sp'),
+      numR1:$('num-r1'), numR4:$('num-r4'), numHb:$('num-hb'), numDmx:$('num-dmx'), numVfc:$('num-vfc'),
+      valLum:$('val-lum'), valEm:$('val-em'), valDem:$('val-dem'), valSens:$('val-sens'), valSw:$('val-sw'), valSp:$('val-sp'),
+      valR1:$('val-r1'), valR4:$('val-r4'), valHb:$('val-hb'), valDmx:$('val-dmx'), valVfc:$('val-vfc'),
+      totalAddr:$('total-addr'), totalMa:$('total-ma'), circuits:$('circuits'),
+      totalAddrSpare:$('total-addr-spare'), totalMaSpare:$('total-ma-spare'), effCaps:$('eff-caps'), spareTotals: $('spare-totals'), spareAddrDiff: $('spare-addr-diff'), spareMaDiff: $('spare-ma-diff'), spareCapRow: $('spare-capacity'),
+      ctrl1:$('ctrl-1ch'), ctrl3:$('ctrl-3ch'), ctrlCombo:$('ctrl-combo'), assignment:$('assignment'), daysAddr:$('days-addr'), daysInputs:$('days-inputs'), daysTotal:$('days-total'), commInfo:$('comm-info'),
+      area:$('circuits-area'),
+      btnRand:$('btn-random'), btnReset:$('btn-reset'), btnExport:$('btn-export'),
+      spare0:$('spare0'), spare5:$('spare5'), spare10:$('spare10'), spare20:$('spare20'), spare30:$('spare30')
+    };
+
+    // Clamp helper
+    function clampInput(numEl, rangeEl){
+      let v = parseInt(numEl.value,10);
+      const min = parseInt(numEl.min||'0',10);
+      const max = parseInt(numEl.max||'0',10);
+      if(isNaN(v)) v = 0;
+      if(v < min) v = min;
+      if(v > max) v = max;
+      numEl.value = v;
+      rangeEl.value = v;
+      return v;
+    }
+
+    // Bind slider <-> number <-> label
+    function bind(range, number, label){
+      range.addEventListener('input', ()=>{ number.value = range.value; label.textContent = range.value; refresh(); });
+      number.addEventListener('input', ()=>{ const v=clampInput(number,range); label.textContent = v; refresh(); });
+    }
+    bind(els.lum, els.numLum, els.valLum);
+    bind(els.em,  els.numEm,  els.valEm);
+    bind(els.dem, els.numDem, els.valDem);
+    bind(els.dem, els.numDem, els.valDem);
+    bind(els.sens,els.numSens,els.valSens);
+    bind(els.sw,  els.numSw,  els.valSw);
+    bind(els.sp,  els.numSp,  els.valSp);
+    bind(els.r1,  els.numR1,  els.valR1);
+    bind(els.r4,  els.numR4,  els.valR4);
+    bind(els.hb,  els.numHb,  els.valHb);
+    bind(els.dmx, els.numDmx, els.valDmx);
+    bind(els.vfc, els.numVfc, els.valVfc);
+
+    // Spare capacity buttons
+    [els.spare0, els.spare5, els.spare10, els.spare20, els.spare30].forEach((btn,i)=>{
+      btn.addEventListener('click', ()=>{
+        [els.spare0, els.spare10, els.spare20].forEach(b=>b.classList.remove('active'));
+        btn.classList.add('active');
+        spare = (i===1)?0.05:(i===2)?0.10:(i===3)?0.20:(i===4)?0.30:0;
+        refresh();
+      });
+    });
+
+    // Buttons
+    els.btnReset.addEventListener('click', ()=>{
+      setVals({lum:10,em:2,sens:1,sw:0,sp:0,r1:0,r4:0,hb:0,dmx:0});
+      [els.spare0, els.spare5, els.spare10, els.spare20, els.spare30].forEach(b=>b.classList.remove('active')); els.spare5.classList.add('active');
+      spare=0; refresh();
+    });
+    els.btnRand.addEventListener('click', ()=>{
+      setVals({
+        lum:rand(0,3000), em:rand(0,1000), sens:rand(0,1000), sw:rand(0,500), sp:rand(0,500),
+        r1:rand(0,50), r4:rand(0,50), hb:rand(0,1000), dmx:rand(0,50)
+      });
+      refresh();
+    });
+    function rand(min,max){ return Math.floor(Math.random()*(max-min+1))+min; }
+    function setVals(v){
+      Object.entries(v).forEach(([k,val])=>{
+        els[k].value = val;
+        const num = 'num'+k.charAt(0).toUpperCase()+k.slice(1);
+        const lab = 'val'+k.charAt(0).toUpperCase()+k.slice(1);
+        if(els[num]) els[num].value = val;
+        if(els[lab]) els[lab].textContent = String(val);
+      });
+    }
+
+    function readValues(){
+      return {
+        lum:+els.lum.value||0, em:+els.em.value||0, dem:+els.dem.value||0, sens:+els.sens.value||0, sw:+els.sw.value||0, sp:+els.sp.value||0,
+        r1:+els.r1.value||0, r4:+els.r4.value||0, hb:+els.hb.value||0, dmx:+els.dmx.value||0, vfc:+els.vfc.value||0
+      };
+    }
+
+    function computeTotals(v){
+      const addr = v.lum*FP.lum.addr + v.em*FP.em.addr + v.dem*FP.dem.addr + v.r1*FP.r1.addr + v.r4*FP.r4.addr + v.dmx*FP.dmx.addr;
+      const ma = v.lum*FP.lum.ma   + v.em*FP.em.ma   + v.sens*FP.sens.ma + v.sw*FP.sw.ma + v.sp*FP.sp.ma +
+                   v.r1*FP.r1.ma + v.r4*FP.r4.ma + v.hb*FP.hb.ma + v.dmx*FP.dmx.ma + v.vfc*FP.vfc.ma + v.dem*FP.dem.ma;
+      return {addr, ma};
+    }
+
+    function controllerPlan(totalCir){
+      const count1 = totalCir;            // all 1CH
+      const count3 = Math.ceil(totalCir/3); // all 3CH
+      const n3 = Math.floor(totalCir/3);  // greedy combo: as many 3CH as possible
+      const rem = totalCir - n3*3;
+      const combo = `3CH × ${n3}` + (rem?` + 1CH × ${rem}`:''); 
+      return {count1, count3, combo, n3, rem};
+    }
+
+    function assignControllers(totalCir){
+      const { n3 } = controllerPlan(totalCir);
+      const map = [];
+      for(let i=0;i<totalCir;i++){
+        if(i < n3*3){
+          const idx = Math.floor(i/3)+1;
+          map.push(`Lighting Controller 3CH #${idx}`);
+        } else {
+          const idx = (i - n3*3) + 1;
+          map.push(`Lighting Controller 1CH #${idx}`);
+        }
+      }
+      return map;
+    }
+
+    // Capacity-aware, even round-robin allocation across circuits; opens new circuits if needed
+    function allocate(values){
+      const totals = computeTotals(values);
+      const effAddr = Math.floor(MAX_ADDR*(1-spare)); // capacity per circuit after spare headroom reserved
+      const effMa   = Math.floor(MAX_MA*(1-spare));
+
+      // theoretical minimum circuits
+      const nByAddr = effAddr>0 ? Math.ceil(totals.addr/effAddr) : 0;
+      const nByMa   = effMa>0   ? Math.ceil(totals.ma/effMa)   : 0;
+      let n = Math.max(1, nByAddr, nByMa);
+
+      const circuits = new Array(n).fill(null).map(()=>({addr:0, ma:0, counts:{}}));
+
+      function placeUnit(key, startIdx){
+        const f = FP[key];
+        const L = circuits.length;
+        for(let step=0; step<L; step++){
+          const i = (startIdx + step) % L;
+          const c = circuits[i];
+          if(c.addr + f.addr <= effAddr && c.ma + f.ma <= effMa){
+            c.addr += f.addr; c.ma += f.ma; c.counts[key] = (c.counts[key]||0)+1; return;
+          }
+        }
+        // none fit -> open new circuit
+        const c = {addr:f.addr, ma:f.ma, counts:{}}; c.counts[key]=1; circuits.push(c);
+      }
+
+      const order = ['lum','em','dem','sens','sw','sp','vfc','r1','r4','hb','dmx'];
+      order.forEach(key=>{
+        const count = values[key];
+        for(let i=0;i<count;i++){ placeUnit(key, i); }
+      });
+
+      return {circuits, effAddr, effMa};
+    }
+
+    
+    /* === DLC Licensing helpers (safe) === */
+    function _dlc_insertLicPanel(){
+      if(document.getElementById('lic-summary')) return; // panel already present
+      const afterEl = document.getElementById('assignment');
+      if(!afterEl) return;
+      const hr = document.createElement('hr');
+      hr.style.margin = '12px 0'; hr.style.border = 'none'; hr.style.borderTop = '1px solid rgba(255,255,255,0.08)';
+      const title = document.createElement('div'); title.className = 'small'; title.textContent = 'Emergency Licensing Summary';
+      const box = document.createElement('div'); box.id = 'lic-summary'; box.className = 'circuit'; box.style.marginTop = '8px';
+      const parent = afterEl.parentNode; parent.insertBefore(hr, afterEl.nextSibling); parent.insertBefore(title, hr.nextSibling); parent.insertBefore(box, title.nextSibling);
+    }
+    function _dlc_emergencyCountForCircuit(c){
+      const em = (c.counts && c.counts.em) || 0;
+      const dem = (c.counts && c.counts.dem) || 0;
+      return em + dem;
+    }
+    // New rationalization rule per controller:
+    // <25 => EC25; 25–50 => EC50; 50–75 => EC50 + EC25; 75+ => EC100
+    function _dlc_licensePacksFor(emCount){
+      if(emCount <= 0) return {EC100:0, EC50:0, EC25:0, covers:0};
+      if(emCount < 25) return {EC100:0, EC50:0, EC25:1, covers:25};
+      if(emCount <= 50) return {EC100:0, EC50:1, EC25:0, covers:50};
+      if(emCount <= 75) return {EC100:0, EC50:1, EC25:1, covers:75};
+      return {EC100:1, EC50:0, EC25:0, covers:100};
+    }
+    function _dlc_sumPacks(a,b){ return {EC100:a.EC100+b.EC100, EC50:a.EC50+b.EC50, EC25:a.EC25+b.EC25}; }
+    function _dlc_packsToText(p){
+      const parts=[]; if(p.EC100) parts.push(`EC100 × ${p.EC100}`); if(p.EC50) parts.push(`EC50 × ${p.EC50}`); if(p.EC25) parts.push(`EC25 × ${p.EC25}`);
+      return parts.length?parts.join(', '):'None';
+    }
+    function _dlc_updateLicensing(values){
+      try{
+        _dlc_insertLicPanel();
+        const alloc = allocate(values);
+        const circuits = alloc.circuits || [];
+        const names = assignControllers(circuits.length);
+        const per = {};
+        circuits.forEach((c,i)=>{
+          const name = names[i];
+          const ems = _dlc_emergencyCountForCircuit(c);
+          per[name] = (per[name]||0) + ems;
+        });
+        let totals = {EC100:0, EC50:0, EC25:0};
+        const lines=[];
+        Object.keys(per).forEach(name=>{
+          const ems = per[name];
+          const pk = _dlc_licensePacksFor(ems);
+          totals = _dlc_sumPacks(totals, pk);
+          lines.push(`${name} — Emerg: ${ems} → Licenses: ${_dlc_packsToText(pk)} (covers ${pk.covers})`);
+        });
+        const div = document.getElementById('lic-summary');
+        if(!div) return;
+        if(lines.length){
+          div.innerHTML = lines.join('<br>') + '<br><strong>Totals → ' + _dlc_packsToText(totals) + '</strong>';
+        } else {
+          div.textContent = 'No emergency devices on any controller';
+        }
+      }catch(e){
+        const div = document.getElementById('lic-summary'); if(div) div.textContent = 'Licensing error: ' + (e && e.message ? e.message : 'Unknown');
+      }
+    }
+
+    function commissioningDays(values, totals){
+      const addrDays = Math.ceil((totals.addr||0) / 59);
+      const inputs = (values.sens||0) + (values.sp||0) + (values.sw||0) + (values.vfc||0);
+      const inputDays = Math.ceil(inputs / 95);
+      return {addrDays, inputDays, total: addrDays + inputDays};
+    }
+    function render(values){
+      // raw totals (never change with spare)
+      const totals = computeTotals(values);
+      els.totalAddr.textContent = totals.addr;
+      els.totalMa.textContent   = totals.ma;
+
+      // spare totals row
+      if(spare > 0){
+        els.spareTotals.style.display = 'flex';
+        els.totalAddrSpare.textContent = Math.ceil(totals.addr*(1+spare));
+        els.totalMaSpare.textContent   = Math.ceil(totals.ma*(1+spare));
+        els.effCaps.textContent = `${Math.floor(MAX_ADDR*(1-spare))} addr / ${Math.floor(MAX_MA*(1-spare))} mA`;
+        if(els.spareAddrDiff && els.spareMaDiff && els.spareCapRow){
+          els.spareCapRow.style.display = 'flex';
+          els.spareAddrDiff.textContent = Math.max(0, Math.ceil(totals.addr*(1+spare)) - (totals.addr||0));
+          els.spareMaDiff.textContent = Math.max(0, Math.ceil(totals.ma*(1+spare)) - (totals.ma||0));
+        }
+      } else {
+        els.spareTotals.style.display = 'none'; if(els.spareCapRow) els.spareCapRow.style.display='none';
+      }
+
+      // allocation
+      const {circuits} = allocate(values);
+      els.circuits.textContent = circuits.length;
+
+      // controllers
+      const {count1, count3, combo} = controllerPlan(circuits.length);
+      els.ctrl1.textContent = count1;
+      els.ctrl3.textContent = count3;
+      els.ctrlCombo.textContent = `Combination: ${combo}`;
+
+      const assignMap = assignControllers(circuits.length);
+      els.assignment.innerHTML = circuits.map((_,i)=>`Circuit ${i+1} — ${assignMap[i]}`).join('<br>');
+
+      // per-circuit view with bars
+      els.area.innerHTML = '';
+      circuits.forEach((c, idx)=>{
+        const div = document.createElement('div'); div.className='circuit';
+        const head = document.createElement('div'); head.style.display='flex'; head.style.justifyContent='space-between';
+        head.innerHTML = `<div><strong>Circuit ${idx+1}</strong></div><div class="small">${c.addr} addr · ${c.ma} mA</div>`;
+        div.appendChild(head);
+
+        // Addresses bar (against 64)
+        const barA = document.createElement('div'); barA.className='bar';
+        const fillA = document.createElement('div'); fillA.className='bar-fill';
+        fillA.style.width = Math.min(100, (c.addr / 64) * 100) + '%';
+        barA.appendChild(fillA); div.appendChild(barA);
+        const labA = document.createElement('div'); labA.className='bar-label';
+        labA.innerHTML = `<div class="small">Addresses</div><div class="small">${c.addr}/64</div>`;
+        div.appendChild(labA);
+
+        // mA bar (against 200)
+        const barM = document.createElement('div'); barM.className='bar';
+        const fillM = document.createElement('div'); fillM.className='bar-fill';
+        fillM.style.width = Math.min(100, (c.ma / 200) * 100) + '%';
+        barM.appendChild(fillM); div.appendChild(barM);
+        const labM = document.createElement('div'); labM.className='bar-label';
+        labM.innerHTML = `<div class="small">Current (mA)</div><div class="small">${c.ma}/200</div>`;
+        div.appendChild(labM);
+
+        const contents = document.createElement('div'); contents.className='small'; contents.style.marginTop='6px';
+        contents.textContent = Object.keys(c.counts).map(k=> (c.counts[k]||0)+' × '+FP[k].name).join(' · ');
+        div.appendChild(contents);
+
+        els.area.appendChild(div);
+      });
+    }
+
+    function refresh(){ const _v = readValues(); render(_v); _dlc_updateLicensing(_v); }
+
+    // Export to Excel
+    els.btnExport.addEventListener('click', ()=>{
+      const values = readValues();
+      const totals = computeTotals(values);
+      const {circuits, effAddr, effMa} = allocate(values);
+
+      const wb = XLSX.utils.book_new();
+      // Licensing sheet (rationalized)
+      const licMap = assignControllers(circuits.length);
+      const licCounts = {};
+      circuits.forEach((c,i)=>{
+        const name = licMap[i];
+        const ems = (c.counts.em||0) + (c.counts.dem||0);
+        licCounts[name] = (licCounts[name]||0) + ems;
+      });
+      const wsLicData = [['Controller','Emergency count','Licenses','Coverage']];
+      let t = {EC100:0, EC50:0, EC25:0}, tCover=0, tEmer=0;
+      Object.keys(licCounts).forEach(name=>{
+        const ems = licCounts[name];
+        const pk = (ems<=0)?{EC100:0,EC50:0,EC25:0,covers:0}:(ems<25)?{EC100:0,EC50:0,EC25:1,covers:25}:(ems<=50)?{EC100:0,EC50:1,EC25:0,covers:50}:(ems<=75)?{EC100:0,EC50:1,EC25:1,covers:75}:{EC100:1,EC50:0,EC25:0,covers:100};
+        wsLicData.push([name, ems, `${pk.EC100?`EC100 × ${pk.EC100}`:''}${(pk.EC100&&pk.EC50)?', ':''}${pk.EC50?`EC50 × ${pk.EC50}`:''}${((pk.EC100||pk.EC50)&&pk.EC25)?', ':''}${pk.EC25?`EC25 × ${pk.EC25}`:''}`.replace(/, $/,'') || 'None', pk.covers]);
+        t.EC100 += pk.EC100; t.EC50 += pk.EC50; t.EC25 += pk.EC25; tCover += pk.covers; tEmer += ems;
+      });
+      wsLicData.push(['Totals', tEmer, `${t.EC100?`EC100 × ${t.EC100}`:''}${(t.EC100&&t.EC50)?', ':''}${t.EC50?`EC50 × ${t.EC50}`:''}${((t.EC100||t.EC50)&&t.EC25)?', ':''}${t.EC25?`EC25 × ${t.EC25}`:''}`.replace(/, $/,'') || 'None', tCover]);
+      const wsLic = XLSX.utils.aoa_to_sheet(wsLicData);
+      XLSX.utils.book_append_sheet(wb, wsLic, 'Licensing');
+
+      // Summary
+      const wsSum = XLSX.utils.aoa_to_sheet([
+        ['Spare capacity', (spare*100)+'%'],
+        ['Raw Totals - Addresses', totals.addr],
+        ['Raw Totals - mA', totals.ma],
+        ['Totals with Spare - Addresses', Math.ceil(totals.addr*(1+spare))],
+        ['Totals with Spare - mA', Math.ceil(totals.ma*(1+spare))],
+        ['Effective per-circuit caps', `${effAddr} addr / ${effMa} mA`],
+        ['Circuits required', circuits.length]
+      ]);
+      XLSX.utils.book_append_sheet(wb, wsSum, 'Summary');
+
+      // Circuits
+      const assignMap = assignControllers(circuits.length);
+      const wsData = [['Circuit','Addresses','mA','Contents','Assigned controller']];
+      circuits.forEach((c,i)=>{
+        const parts = Object.keys(c.counts).map(k=> (c.counts[k]||0)+' × '+FP[k].name).join(' · ');
+        wsData.push([i+1, c.addr, c.ma, parts, assignMap[i]]);
+      });
+      const wsCir = XLSX.utils.aoa_to_sheet(wsData);
+      XLSX.utils.book_append_sheet(wb, wsCir, 'Circuits');
+
+      // Controllers
+      const {count1, count3, combo} = controllerPlan(circuits.length);
+      const wsCtl = XLSX.utils.aoa_to_sheet([
+        ['1CH needed (all 1CH)', count1],
+        ['3CH needed (all 3CH)', count3],
+        ['Combination plan', combo]
+      ]);
+      XLSX.utils.book_append_sheet(wb, wsCtl, 'Controllers');
+
+      XLSX.writeFile(wb, 'DALI_LIGHTING_CONTROL_Simulator.xlsx');
+    });
+
+    // Initial render
+    refresh();
+  })();
+  </script>
+</body>
+</html>
